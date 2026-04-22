@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RechtsKompas Advies — Juridische analyse op maat</title>
+  <meta name="description" content="Professionele juridische analyse voor huurrecht, arbeidsrecht en consumentenrecht."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @keyframes sp{to{transform:rotate(360deg)}}
+    @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--gold:#b49650;--gold-dim:rgba(180,150,80,.15);--gold-border:rgba(180,150,80,.22);--bg:#080e1a;--bg2:#0c1525;--bg3:rgba(255,255,255,.035);--text:#ddd4bc;--text-dim:rgba(220,210,185,.45);--text-muted:rgba(220,210,185,.22);--red:#a04030;--green:#3a7d52;--border:rgba(180,150,80,.12)}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+    .pf{font-family:'Playfair Display',Georgia,serif}
+    .card{background:var(--bg3);border:1px solid var(--gold-border);border-radius:3px;transition:all .18s;cursor:pointer}
+    .card:hover{border-color:rgba(180,150,80,.5);background:rgba(255,255,255,.06)}
+    .card.sel{background:rgba(180,150,80,.1);border-color:var(--gold)}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;border-radius:3px;transition:all .18s;white-space:nowrap}
+    .btn-gold{background:var(--gold);color:#080e1a;padding:11px 24px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase}
+    .btn-gold:hover{background:#c4a660}.btn-gold:disabled{opacity:.35;cursor:not-allowed}
+    .btn-ghost{background:transparent;color:var(--gold);border:1px solid rgba(180,150,80,.38);padding:9px 18px;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+    .btn-ghost:hover{border-color:var(--gold);background:var(--gold-dim)}
+    input,textarea,select{background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text);width:100%;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.7;outline:none;border-radius:3px;transition:border-color .18s}
+    input:focus,textarea:focus,select:focus{border-color:var(--gold)}
+    textarea{resize:vertical}
+    select option{background:#0c1525}
+    .label{display:block;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(180,150,80,.65);margin-bottom:8px}
+    .tab{cursor:pointer;padding:9px 14px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:2px solid transparent;transition:all .18s;color:var(--text-muted);white-space:nowrap}
+    .tab.act{color:var(--gold);border-bottom-color:var(--gold)}
+    .badge{display:inline-block;padding:3px 9px;font-size:10px;letter-spacing:.8px;border-radius:2px}
+    .badge-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(180,150,80,.25)}
+    .badge-red{background:rgba(160,64,48,.12);color:#c06050;border:1px solid rgba(160,64,48,.25)}
+    .div{height:1px;background:linear-gradient(90deg,transparent,rgba(180,150,80,.2),transparent);margin:22px 0}
+    .brief-box{white-space:pre-wrap;font-size:13px;line-height:1.95;color:#c0b898;background:rgba(0,0,0,.2);padding:22px;border:1px solid var(--border);border-radius:3px}
+    .ldr{display:inline-block;width:15px;height:15px;border:2px solid rgba(180,150,80,.2);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite}
+    .ani{animation:fi .25s ease}
+    .err{background:rgba(160,64,48,.1);border:1px solid rgba(160,64,48,.3);color:#c06050;padding:10px 14px;font-size:12px;border-radius:3px;margin-bottom:14px}
+    .info-box{background:var(--gold-dim);border:1px solid rgba(180,150,80,.25);padding:14px 18px;border-radius:3px}
+    .modal-bg{position:fixed;inset:0;background:rgba(4,8,18,.93);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+    .modal{background:#0c1525;border:1px solid rgba(180,150,80,.3);border-radius:4px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto}
+    ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(180,150,80,.2)}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const RG = [
+  { id:"huurrecht", icon:"🏠", hc:true, label:"Huurrecht", ow:[
+    {id:"servicekosten",icon:"€",label:"Servicekosten"},{id:"ontbinding",icon:"⚖",label:"Ontbinding huurcontract"},
+    {id:"gebreken",icon:"🔧",label:"Gebreken & herstelplicht"},{id:"huurverhoging",icon:"↑",label:"Huurverhoging"},
+    {id:"overlast",icon:"⚠",label:"Overlast & burenrecht"},{id:"borg",icon:"🔒",label:"Borgsom"},
+    {id:"opzegging",icon:"📋",label:"Opzegging & huurbescherming"},{id:"anders",icon:"•",label:"Overig"}]},
+  { id:"arbeidsrecht", icon:"💼", hc:false, label:"Arbeidsrecht", ow:[
+    {id:"ontslag",icon:"✕",label:"Ontslag"},{id:"loon",icon:"€",label:"Loondoorbetaling"},
+    {id:"contract",icon:"📋",label:"Arbeidscontract"},{id:"ziekte",icon:"+",label:"Ziekte & re-integratie"},
+    {id:"concurrentie",icon:"⚖",label:"Concurrentiebeding"},{id:"overwerk",icon:"⏱",label:"Overwerk"},
+    {id:"discriminatie",icon:"⚠",label:"Discriminatie"},{id:"anders_a",icon:"•",label:"Overig"}]},
+  { id:"consumentenrecht", icon:"🛒", hc:false, label:"Consumentenrecht", ow:[
+    {id:"garantie",icon:"✓",label:"Garantie"},{id:"nonconform",icon:"✕",label:"Non-conformiteit"},
+    {id:"retour",icon:"↩",label:"Retour & terugbetaling"},{id:"online",icon:"📦",label:"Online aankoop"},
+    {id:"misleiding",icon:"⚠",label:"Misleidende praktijken"},{id:"abonnement",icon:"🔄",label:"Abonnement & opzegging"},
+    {id:"anders_c",icon:"•",label:"Overig"}]},
+];
+
+const SP = (rgId) => {
+  const hc = rgId==="huurrecht"
+    ? `"huurcommissie":{"score":<0-100>,"verdict":"<Kansrijk/Matig kansrijk/Niet kansrijk>","toelichting":"<2-3 zinnen>"},`
+    : `"huurcommissie":null,`;
+  return `Je bent een gespecialiseerd juridisch analyseplatform voor Nederlands recht. Gebruik formele juridische taal. Noem geen AI.
+
+Retourneer UITSLUITEND valide JSON. Geen tekst ervoor of erna. Begin direct met {
+
+{"samenvatting":"2-3 zinnen juridische positiebeoordeling","analyse":"Uitgebreide juridische analyse min. 200 woorden. Specifieke wetsartikelen (bijv. art. 7:206 BW). Concrete rechten en plichten.","wetsartikelen":["Art. 7:206 BW – Herstelplicht verhuurder"],"kansen":["Sterk punt 1","Sterk punt 2","Sterk punt 3"],"risicos":["Aandachtspunt 1","Aandachtspunt 2"],"stappen":["Stap 1","Stap 2","Stap 3","Stap 4"],${hc}"complexiteit":<1-10>,"brief":"Volledige formele brief. Datum: ${new Date().toLocaleDateString("nl-NL")}. Adresblok. Betreft-regel. Juridische onderbouwing. Sommatie met 14-daagse termijn. Min. 300 woorden.","disclaimer":"LexDesk biedt juridische informatie op basis van het Nederlands recht. Dit vormt geen juridisch advies."}`;
+};
+
+const Logo = () => (
+  <svg width="140" height="36" viewBox="0 0 150 40" fill="none">
+    <g transform="translate(2,4)">
+      <line x1="16" y1="7" x2="16" y2="24" stroke="#b49650" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="6" y1="10" x2="26" y2="10" stroke="#b49650" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="6" cy="18" r="4.5" fill="none" stroke="#b49650" strokeWidth="1.5"/>
+      <circle cx="26" cy="18" r="4.5" fill="none" stroke="#b49650" strokeWidth="1.5"/>
+      <line x1="6" y1="10" x2="6" y2="13.5" stroke="#b49650" strokeWidth="1.5"/>
+      <line x1="26" y1="10" x2="26" y2="13.5" stroke="#b49650" strokeWidth="1.5"/>
+      <line x1="10" y1="24" x2="22" y2="24" stroke="#b49650" strokeWidth="1.5" strokeLinecap="round"/>
+    </g>
+    <text x="38" y="26" fontFamily="'Playfair Display',Georgia,serif" fontSize="17" fontWeight="700" fill="#ddd4bc" letterSpacing="1">RECHTS</text>
+    <text x="104" y="26" fontFamily="'Playfair Display',Georgia,serif" fontSize="17" fontWeight="400" fill="#b49650" letterSpacing="1">KOMPAS</text>
+  </svg>
+);
+
+function BetaalModal({ type, onSuccess, onCancel }) {
+  const PRIJS = { email:"€ 9,95", tegenreactie:"€ 19,95", jurist:"€ 49,95" };
+  const LABEL = { email:"Brief e-mailen", tegenreactie:"Tegenreactie analyseren", jurist:"Jurist contacteren" };
+  const [kaart,setKaart] = useState(""); const [verval,setVerval] = useState(""); const [cvv,setCvv] = useState(""); const [nm,setNm] = useState("");
+  const [bezig,setBezig] = useState(false); const [ok,setOk] = useState(false);
+  const fmtK = v => v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();
+  const fmtV = v => { const d=v.replace(/\D/g,"").slice(0,4); return d.length>2?d.slice(0,2)+"/"+d.slice(2):d; };
+  const valid = kaart.replace(/\s/g,"").length===16&&verval.length===5&&cvv.length>=3&&nm.length>2;
+  const pay = async () => { setBezig(true); await new Promise(r=>setTimeout(r,1800)); setOk(true); setTimeout(onSuccess,800); };
+  const inp = {background:"rgba(255,255,255,.04)",border:"1px solid rgba(180,150,80,.2)",color:"#ddd4bc",padding:"11px 13px",fontFamily:"'DM Sans',sans-serif",fontSize:13,outline:"none",borderRadius:2,width:"100%"};
+  return (
+    <div className="modal-bg">
+      <div className="modal">
+        <div style={{padding:"22px 26px 18px",borderBottom:"1px solid var(--border)"}}>
+          <Logo/>
+          <div style={{marginTop:14}}>
+            <div className="pf" style={{fontSize:17,fontWeight:600,color:"var(--text)",marginBottom:3}}>{LABEL[type]}</div>
+            <div style={{marginTop:8,display:"inline-block",background:"var(--gold-dim)",border:"1px solid rgba(180,150,80,.3)",padding:"4px 12px",borderRadius:2}}>
+              <span className="pf" style={{fontSize:20,fontWeight:700,color:"var(--gold)"}}>{PRIJS[type]}</span>
+            </div>
+          </div>
+        </div>
+        {ok ? <div style={{padding:"36px 26px",textAlign:"center"}}><div style={{fontSize:32,color:"#5a9e6f",marginBottom:8}}>✓</div><div className="pf" style={{fontSize:16,color:"#5a9e6f"}}>Betaling geslaagd</div></div>
+        : <div style={{padding:"22px 26px"}}>
+          <div style={{marginBottom:12}}><label className="label">Naam op kaart</label><input type="text" style={inp} placeholder="J. de Vries" value={nm} onChange={e=>setNm(e.target.value)}/></div>
+          <div style={{marginBottom:12}}><label className="label">Kaartnummer</label><input type="text" style={inp} placeholder="1234 5678 9012 3456" maxLength={19} value={kaart} onChange={e=>setKaart(fmtK(e.target.value))}/></div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:18}}>
+            <div><label className="label">Vervaldatum</label><input type="text" style={inp} placeholder="MM/JJ" maxLength={5} value={verval} onChange={e=>setVerval(fmtV(e.target.value))}/></div>
+            <div><label className="label">CVV</label><input type="text" style={inp} placeholder="123" maxLength={4} value={cvv} onChange={e=>setCvv(e.target.value)}/></div>
+          </div>
+          <button className="btn btn-gold" disabled={!valid||bezig} onClick={pay} style={{width:"100%",justifyContent:"center"}}>
+            {bezig?<><span className="ldr"/>Verwerken...</>:"Betalen en doorgaan"}
+          </button>
+          <button onClick={onCancel} style={{width:"100%",background:"transparent",color:"rgba(220,210,185,.35)",border:"none",padding:"8px",fontFamily:"'DM Sans',sans-serif",fontSize:11,cursor:"pointer",marginTop:6}}>Annuleren</button>
+          <div style={{textAlign:"center",marginTop:10,fontSize:9,color:"var(--text-muted)",letterSpacing:1}}>🔒 SSL BEVEILIGD · PCI DSS</div>
+        </div>}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [rg,setRg] = useState(null); const [rol,setRol] = useState(null); const [ow,setOw] = useState(null);
+  const [naam,setNaam] = useState(""); const [situatie,setSituatie] = useState(""); const [stap,setStap] = useState(1);
+  const [loading,setLoading] = useState(false); const [res,setRes] = useState(null); const [err,setErr] = useState(null);
+  const [tab,setTab] = useState("analyse"); const [gkp,setGkp] = useState(false);
+  const [betaal,setBetaal] = useState(null); const [emailOk,setEmailOk] = useState(false); const [tegenOk,setTegenOk] = useState(false);
+  const [tegenIn,setTegenIn] = useState(""); const [tegenRes,setTegenRes] = useState(null); const [tegenLoad,setTegenLoad] = useState(false);
+
+  const rgObj = RG.find(r=>r.id===rg); const owObj = rgObj?.ow.find(o=>o.id===ow);
+
+  const analyse = async () => {
+    setLoading(true); setErr(null); setRes(null);
+    try {
+      const r = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,system:SP(rg),messages:[{role:"user",content:`Rol: ${rol==="huurder"?"Huurder/Werknemer/Consument":"Verhuurder/Werkgever/Verkoper"}\nRechtsgebied: ${rgObj?.label}\nOnderwerp: ${owObj?.label}\nNaam: ${naam||"Niet opgegeven"}\n\nSituatie:\n${situatie}`}]})});
+      const d = await r.json();
+      if(d.error) throw new Error(d.error.message);
+      const txt = (d.content||[]).map(b=>b.text||"").join("").trim();
+      const parsed = JSON.parse(txt.replace(/^```json\s*/m,"").replace(/```\s*$/m,"").trim());
+      setRes(parsed); setTab("analyse"); setStap(3);
+    } catch(e){setErr("Analyse mislukt: "+e.message);}
+    finally{setLoading(false);}
+  };
+
+  const tegenAnalyse = async () => {
+    if(!tegenOk){setBetaal("tegenreactie");return;} if(tegenIn.length<20)return;
+    setTegenLoad(true);
+    try {
+      const r = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,system:`Analyseer de tegenreactie en genereer een juridische weerlegging. Retourneer ALLEEN JSON: {"analyse_tegenreactie":"...","brief_tegenreactie":"Volledige formele tegenreactiebrief min. 300 woorden."}`,messages:[{role:"user",content:`Originele situatie: ${situatie}\n\nBrief: ${res?.brief}\n\nTegenreactie: ${tegenIn}`}]})});
+      const d = await r.json();
+      const txt = (d.content||[]).map(b=>b.text||"").join("").trim();
+      setTegenRes(JSON.parse(txt.replace(/^```json\s*/m,"").replace(/```\s*$/m,"").trim()));
+    } catch(e){setErr("Tegenreactie mislukt.");}
+    finally{setTegenLoad(false);}
+  };
+
+  const kopieer = (txt) => { navigator.clipboard.writeText(txt||""); setGkp(true); setTimeout(()=>setGkp(false),2000); };
+  const emailBrief = () => {
+    if(!emailOk){setBetaal("email");return;}
+    window.open(`mailto:?subject=${encodeURIComponent(rgObj?.label+" – "+owObj?.label)}&body=${encodeURIComponent(res?.brief||"")}`);
+  };
+  const reset = () => { setRg(null);setRol(null);setOw(null);setNaam("");setSituatie("");setStap(1);setRes(null);setErr(null);setTegenIn("");setTegenRes(null); };
+
+  const hcS = res?.huurcommissie?.score??null;
+  const hcK = hcS>=65?"#3a7d52":hcS>=35?"#b49650":"#a04030";
+
+  return (
+    <div style={{minHeight:"100vh",background:"var(--bg)"}}>
+      <header style={{borderBottom:"1px solid var(--border)",padding:"13px 28px",display:"flex",alignItems:"center",justifyContent:"space-between",background:"rgba(0,0,0,.35)",position:"sticky",top:0,zIndex:100}}>
+        <Logo/>
+        <div style={{fontSize:10,color:"var(--text-muted)",fontFamily:"'DM Sans',sans-serif"}}>Juridisch Adviesplatform</div>
+      </header>
+      <div style={{background:"rgba(0,0,0,.2)",borderBottom:"1px solid var(--border)",padding:"7px 28px",display:"flex",gap:24,overflowX:"auto"}}>
+        {["🔒 SSL Beveiligd","⚖ Nederlands Recht","📋 3 rechtsgebieden","⚡ Analyse in 30 sec"].map(s=><span key={s} style={{fontSize:10,color:"var(--text-muted)",letterSpacing:.5,whiteSpace:"nowrap",fontFamily:"'DM Sans',sans-serif"}}>{s}</span>)}
+      </div>
+
+      <main style={{maxWidth:800,margin:"0 auto",padding:"38px 22px"}}>
+        {stap===1&&<div className="ani">
+          <div className="pf" style={{fontSize:30,fontWeight:600,lineHeight:1.2,marginBottom:6}}>Uw juridische positie</div>
+          <p style={{color:"var(--text-dim)",fontSize:13,marginBottom:30,fontFamily:"'DM Sans',sans-serif"}}>Selecteer rechtsgebied, rol en onderwerp om de analyse te starten.</p>
+          <div style={{marginBottom:24}}>
+            <div className="label">Rechtsgebied</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:9}}>
+              {RG.map(r=><div key={r.id} className={`card ${rg===r.id?"sel":""}`} style={{padding:15}} onClick={()=>{setRg(r.id);setOw(null);}}>
+                <div style={{fontSize:20,marginBottom:7,opacity:.7}}>{r.icon}</div>
+                <div className="pf" style={{fontSize:14,fontWeight:500,color:rg===r.id?"var(--gold)":"var(--text)"}}>{r.label}</div>
+              </div>)}
+            </div>
+          </div>
+          <div style={{marginBottom:24}}>
+            <div className="label">Uw rol</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
+              {[{id:"huurder",l:"Huurder · Werknemer · Consument",s:"Ik wil mijn rechten kennen"},{id:"verhuurder",l:"Verhuurder · Werkgever · Verkoper",s:"Ik wil mijn plichten kennen"}].map(r=><div key={r.id} className={`card ${rol===r.id?"sel":""}`} style={{padding:"14px 16px"}} onClick={()=>setRol(r.id)}>
+                <div className="pf" style={{fontSize:14,fontWeight:500,marginBottom:3,color:rol===r.id?"var(--gold)":"var(--text)"}}>{r.l}</div>
+                <div style={{fontSize:11,color:"var(--text-muted)",fontFamily:"'DM Sans',sans-serif"}}>{r.s}</div>
+              </div>)}
+            </div>
+          </div>
+          {rg&&<div style={{marginBottom:28}}>
+            <div className="label">Onderwerp</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
+              {rgObj?.ow.map(o=><div key={o.id} className={`card ${ow===o.id?"sel":""}`} style={{padding:"10px 13px",display:"flex",alignItems:"center",gap:9}} onClick={()=>setOw(o.id)}>
+                <span style={{fontSize:13,opacity:.6}}>{o.icon}</span>
+                <span style={{fontSize:12,color:ow===o.id?"var(--gold)":"var(--text)",fontFamily:"'DM Sans',sans-serif"}}>{o.label}</span>
+              </div>)}
+            </div>
+          </div>}
+          <button className="btn btn-gold" disabled={!rg||!rol||!ow} onClick={()=>setStap(2)}>Verder →</button>
+        </div>}
+
+        {stap===2&&<div className="ani">
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:22}}>
+            <button className="btn btn-ghost" onClick={()=>setStap(1)}>← Terug</button>
+            <span className="badge badge-gold">{rgObj?.label}</span>
+            <span className="badge badge-gold">{owObj?.label}</span>
+          </div>
+          <div className="pf" style={{fontSize:28,fontWeight:600,lineHeight:1.2,marginBottom:6}}>Uw situatie</div>
+          <p style={{color:"var(--text-dim)",fontSize:13,marginBottom:24,fontFamily:"'DM Sans',sans-serif"}}>Een nauwkeurige beschrijving leidt tot een sterker juridisch advies.</p>
+          <div style={{marginBottom:13}}><label className="label">Uw naam (voor de brief)</label><input type="text" placeholder="Bijv. J. de Vries" value={naam} onChange={e=>setNaam(e.target.value)}/></div>
+          <div style={{marginBottom:20}}>
+            <label className="label">Situatiebeschrijving</label>
+            <textarea rows={9} placeholder="Beschrijf zo concreet mogelijk: wanneer is de situatie ontstaan, wat is er exact voorgevallen, welke stappen heeft u reeds gezet, en wat is uw gewenste uitkomst?" value={situatie} onChange={e=>setSituatie(e.target.value)}/>
+            <div style={{textAlign:"right",fontSize:10,color:situatie.length<30?"var(--text-muted)":"var(--gold)",marginTop:5,fontFamily:"'DM Sans',sans-serif"}}>{situatie.length} tekens{situatie.length<30&&" · minimaal 30 vereist"}</div>
+          </div>
+          {err&&<div className="err">{err}</div>}
+          <button className="btn btn-gold" disabled={situatie.length<30||loading} onClick={analyse}>
+            {loading?<><span className="ldr"/>Analyse loopt...</>:"Analyse starten →"}
+          </button>
+          {loading&&<p style={{fontSize:11,color:"var(--text-muted)",marginTop:10,fontFamily:"'DM Sans',sans-serif"}}>Wetsartikelen worden geraadpleegd. Duurt 15–30 seconden.</p>}
+        </div>}
+
+        {stap===3&&res&&<div className="ani">
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:22,flexWrap:"wrap",gap:12}}>
+            <div>
+              <div className="pf" style={{fontSize:24,fontWeight:600,color:"var(--gold)",marginBottom:8}}>Juridische beoordeling</div>
+              <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+                <span className="badge badge-gold">{rgObj?.label}</span>
+                <span className="badge badge-gold">{owObj?.label}</span>
+                {res.complexiteit>=7&&<span className="badge badge-red">⚠ Complexe zaak</span>}
+              </div>
+            </div>
+            <button className="btn btn-ghost" onClick={reset}>Nieuwe analyse</button>
+          </div>
+
+          <div style={{background:"rgba(180,150,80,.06)",border:"1px solid rgba(180,150,80,.2)",padding:"15px 19px",marginBottom:18,borderLeft:"3px solid var(--gold)"}}>
+            <p style={{fontSize:13,lineHeight:1.85,color:"#c8bfa8",fontFamily:"'DM Sans',sans-serif"}}>{res.samenvatting}</p>
+          </div>
+
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:18}}>
+            <div className="card" style={{padding:"14px 16px"}}>
+              <div style={{fontSize:9,letterSpacing:2,textTransform:"uppercase",color:"#3a7d52",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>Sterke punten</div>
+              {res.kansen?.map((k,i)=><div key={i} style={{fontSize:12,color:"#c8bfa8",marginBottom:6,display:"flex",gap:8,lineHeight:1.6,fontFamily:"'DM Sans',sans-serif"}}><span style={{color:"#5a9e6f"}}>✓</span>{k}</div>)}
+            </div>
+            <div className="card" style={{padding:"14px 16px"}}>
+              <div style={{fontSize:9,letterSpacing:2,textTransform:"uppercase",color:"var(--red)",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>Aandachtspunten</div>
+              {res.risicos?.map((r,i)=><div key={i} style={{fontSize:12,color:"#c8bfa8",marginBottom:6,display:"flex",gap:8,lineHeight:1.6,fontFamily:"'DM Sans',sans-serif"}}><span style={{color:"#c06050"}}>!</span>{r}</div>)}
+            </div>
+          </div>
+
+          <div style={{display:"flex",borderBottom:"1px solid var(--border)",marginBottom:20,overflowX:"auto"}}>
+            {[{id:"analyse",l:"Analyse"},{id:"stappen",l:"Vervolgstappen"},{id:"wet",l:"Wetsartikelen"},{id:"brief",l:"Formele brief"},...(rgObj?.hc&&res.huurcommissie?[{id:"hc",l:"Huurcommissie"}]:[]),{id:"tegen",l:"Tegenreactie"}].map(t=>(
+              <div key={t.id} className={`tab ${tab===t.id?"act":""}`} onClick={()=>setTab(t.id)}>{t.l}</div>
+            ))}
+          </div>
+
+          {tab==="analyse"&&<div className="ani" style={{fontSize:13,lineHeight:1.9,color:"#c8bfa8",fontFamily:"'DM Sans',sans-serif"}}>{res.analyse}</div>}
+          {tab==="stappen"&&<div className="ani">{res.stappen?.map((s,i)=>(
+            <div key={i} style={{display:"flex",gap:14,marginBottom:14}}>
+              <div style={{width:24,height:24,borderRadius:"50%",background:"var(--gold-dim)",border:"1px solid rgba(180,150,80,.3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                <span style={{fontSize:10,color:"var(--gold)",fontFamily:"'DM Sans',sans-serif"}}>{i+1}</span>
+              </div>
+              <p style={{fontSize:13,lineHeight:1.8,color:"#c8bfa8",paddingTop:2,fontFamily:"'DM Sans',sans-serif"}}>{s}</p>
+            </div>
+          ))}</div>}
+          {tab==="wet"&&<div className="ani" style={{display:"flex",flexDirection:"column",gap:7}}>
+            {res.wetsartikelen?.map((w,i)=><div key={i} className="card" style={{padding:"10px 14px"}}><span style={{fontSize:12,color:"#c8bfa8",fontFamily:"'DM Sans',sans-serif"}}>§ {w}</span></div>)}
+          </div>}
+          {tab==="brief"&&<div className="ani">
+            <div style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap"}}>
+              <button className="btn btn-ghost" onClick={()=>kopieer(res.brief)}>{gkp?"✓ Gekopieerd":"Brief kopiëren"}</button>
+              <button className="btn btn-gold" onClick={emailBrief} style={{fontSize:11}}>✉ E-mail versturen{!emailOk&&<span style={{opacity:.6,fontWeight:400}}> · €9,95</span>}</button>
+            </div>
+            <div className="brief-box">{res.brief}</div>
+          </div>}
+          {tab==="hc"&&res.huurcommissie&&<div className="ani">
+            <div style={{display:"flex",alignItems:"center",gap:22,marginBottom:20,flexWrap:"wrap"}}>
+              <div style={{width:80,height:80,borderRadius:"50%",border:`3px solid ${hcK}`,background:`${hcK}14`,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+                <div className="pf" style={{fontSize:24,fontWeight:700,color:hcK}}>{hcS}</div>
+                <div style={{fontSize:8,color:hcK,letterSpacing:1,fontFamily:"'DM Sans',sans-serif"}}>/ 100</div>
+              </div>
+              <div><div className="pf" style={{fontSize:18,fontWeight:600,color:hcK,marginBottom:3}}>{res.huurcommissie.verdict}</div></div>
+            </div>
+            <div style={{background:"var(--bg3)",border:"1px solid var(--border)",padding:"14px 18px",borderRadius:3}}>
+              <p style={{fontSize:13,lineHeight:1.8,color:"#c8bfa8",fontFamily:"'DM Sans',sans-serif"}}>{res.huurcommissie.toelichting}</p>
+            </div>
+          </div>}
+          {tab==="tegen"&&<div className="ani">
+            <div className="pf" style={{fontSize:18,fontWeight:600,color:"var(--text)",marginBottom:6}}>Tegenreactie analyseren</div>
+            <p style={{fontSize:13,color:"var(--text-dim)",marginBottom:20,lineHeight:1.7,fontFamily:"'DM Sans',sans-serif"}}>Voer de ontvangen reactie in. Wij analyseren de inhoud en genereren een gefundeerde weerlegging.</p>
+            {!tegenRes?<>
+              <div style={{marginBottom:14}}><label className="label">Ontvangen reactie</label><textarea rows={7} placeholder="Plak hier de tekst van de ontvangen reactie..." value={tegenIn} onChange={e=>setTegenIn(e.target.value)}/></div>
+              <button className="btn btn-gold" disabled={tegenIn.length<20||tegenLoad} onClick={tegenAnalyse}>
+                {tegenLoad?<><span className="ldr"/>Analyseren...</>:<>⚖ Tegenreactie genereren{!tegenOk&&<span style={{opacity:.6,fontWeight:400}}> · €19,95</span>}</>}
+              </button>
+            </>:<>
+              <div style={{marginBottom:14}}><div className="label">Juridische analyse</div><div style={{fontSize:13,lineHeight:1.9,color:"#c8bfa8",fontFamily:"'DM Sans',sans-serif"}}>{tegenRes.analyse_tegenreactie}</div></div>
+              <div className="div"/>
+              <button className="btn btn-ghost" style={{marginBottom:12}} onClick={()=>kopieer(tegenRes.brief_tegenreactie)}>Brief kopiëren</button>
+              <div className="brief-box">{tegenRes.brief_tegenreactie}</div>
+            </>}
+          </div>}
+
+          <div className="div"/>
+          <p style={{fontSize:10,color:"var(--text-muted)",lineHeight:1.7,fontFamily:"'DM Sans',sans-serif"}}>{res.disclaimer}</p>
+        </div>}
+      </main>
+
+      <footer style={{borderTop:"1px solid var(--border)",padding:"16px 28px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,background:"rgba(0,0,0,.2)"}}>
+        <Logo/>
+        <div style={{fontSize:10,color:"var(--text-muted)",fontFamily:"'DM Sans',sans-serif"}}>© {new Date().getFullYear()} RechtsKompas · Juridische informatiedienst</div>
+      </footer>
+
+      {betaal&&<BetaalModal type={betaal} onSuccess={()=>{if(betaal==="email")setEmailOk(true);else setTegenOk(true);setBetaal(null);}} onCancel={()=>setBetaal(null)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
